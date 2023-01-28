@@ -1,10 +1,10 @@
-const {ObjectId} = require('mongoose').Types;
+const { ObjectId } = require('mongoose').Types;
 const Product = require('../models/products');
 const User = require('../models/users');
 
 exports.getAll = async (req, res, next) => {
     try {
-        const products = await Product.find();
+        const products = await Product.find({ farmerId: req.params.id });
         res.status(200).json(products);
     } catch (error) {
         res.status(500).json(error);
@@ -73,8 +73,8 @@ exports.create = async (req, res, next) => {
 
 exports.update = async (req, res, next) => {
     try {
-        const {id} = req.params;
-        const updated = await Product.updateOne({_id: id}, {$set: req.body});
+        const { id } = req.params;
+        const updated = await Product.updateOne({ _id: id }, { $set: req.body });
         res.status(200).json(updated);
     } catch (error) {
         res.status(500).json(error);
@@ -82,11 +82,11 @@ exports.update = async (req, res, next) => {
 }
 
 exports.delete = async (req, res, next) => {
-    const {id} = req.params;
+    const { id } = req.params;
     try {
-        const {id} = req.params;
-        const deleted = await Product.deleteOne({_id: id});
-        res.status(200).json({message:'deleted'});
+        const { id } = req.params;
+        const deleted = await Product.deleteOne({ _id: id });
+        res.status(200).json({ message: 'deleted' });
     } catch (error) {
         res.status(500).json(error);
     }
