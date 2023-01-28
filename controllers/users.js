@@ -25,11 +25,13 @@ exports.UserLogin = async (req, res, next) => {
         expiresIn: "1h"
       })
     res.status(200).json({
+      mobile: mobile,
       token: token,
       expiresIn: 3600,
-      userId: fetched._id
+      userId: fetched._id,
+      status: 200
     });
-    
+
   } catch (err) {
     next(err);
   }
@@ -39,61 +41,61 @@ exports.UserLogin = async (req, res, next) => {
 
 // GET ALL USERS
 exports.getAll = async (req, res, next) => {
-    try {
-        const users = await User.find();
-        res.status(200).json(users);
-    } catch (err) {
-        next(err);
-    }
+  try {
+    const users = await User.find();
+    res.status(200).json(users);
+  } catch (err) {
+    next(err);
+  }
 }
 
 // GET ONE USER
 exports.getOne = async (req, res, next) => {
-    try {
-        const user = await User.findById(req.params.id);
-        res.status(200).json(user);
-    } catch (err) {
-        next(err);
-    }
+  try {
+    const user = await User.findById(req.params.id);
+    res.status(200).json(user);
+  } catch (err) {
+    next(err);
+  }
 }
 
 // CREATE USER
 exports.create = async (req, res, next) => {
-    try {
-        const { name, mobile, organization, isFarmer, password } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
-        let user = new User({
-            name,
-            mobile,
-            organization,
-            isFarmer,
-            password :hashedPassword
-        });
-        await user.save()
-        res.status(201).json(user);
-    } catch (err) {
-        next(err);
-    }
+  try {
+    const { name, mobile, organization, isFarmer, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    let user = new User({
+      name,
+      mobile,
+      organization,
+      isFarmer,
+      password: hashedPassword
+    });
+    await user.save()
+    res.status(201).json(user);
+  } catch (err) {
+    next(err);
+  }
 }
 
 // UPDATE USER
 exports.update = async (req, res, next) => {
-    try {
-        const user = await User.updateOne(req.params.id, req.body);
-        res.status(200).json(user);
-    } catch (err) {
-        next(err);
-    }
+  try {
+    const user = await User.updateOne(req.params.id, req.body);
+    res.status(200).json(user);
+  } catch (err) {
+    next(err);
+  }
 }
 
 
 
 // DELETE USER
 exports.delete = async (req, res, next) => {
-    try {
-        const user = await User.deleteOne(req.params.id);
-        res.status(200).json(user);
-    } catch (err) {
-        next(err);
-    }
+  try {
+    const user = await User.deleteOne(req.params.id);
+    res.status(200).json(user);
+  } catch (err) {
+    next(err);
+  }
 }
