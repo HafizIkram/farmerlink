@@ -1,6 +1,7 @@
 const User = require('../models/users');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const {ObjectId} = require('mongoose').Types;
 
 // LOGIN USER with mobile and isFarmer and return jwt
 exports.UserLogin = async (req, res, next) => {
@@ -70,6 +71,7 @@ exports.create = async (req, res, next) => {
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         let user = new User({
+            _id: new ObjectId,
             name,
             mobile,
             organization,
@@ -77,7 +79,13 @@ exports.create = async (req, res, next) => {
             password :hashedPassword
         });
         await user.save()
-        res.status(201).json(user);
+        const token = jwt.sign(
+          { mobile: user.mobile, isFarmer: user.isFarmer, userId: user._id },
+          process.env.JWT_KEY,
+          {
+            expiresIn: "1h"
+         })
+        res.status(201).json({...user._doc, token});
     } catch (err) {
         next(err);
     }
