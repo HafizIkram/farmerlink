@@ -2,6 +2,40 @@ const User = require('../models/users');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+// LOGIN USER with mobile and isFarmer and return jwt
+exports.UserLogin = async (req, res, next) => {
+  const { mobile, isFarmer, password } = req.body;
+  try {
+    const fetched = await User.findOne({ mobile: mobile, isFarmer: isFarmer });
+    if (!fetched) {
+      return res.status(401).json({
+        message: 'Authentication failed'
+      });
+    }
+    const result = await bcrypt.compare(password, fetched.password);
+    if (!result) {
+      return res.status(401).json({
+        message: 'Authentication failed'
+      });
+    }
+    const token = jwt.sign(
+      { mobile: fetched.mobile, isFarmer: fetched.isFarmer, userId: fetched._id },
+      process.env.JWT_KEY,
+      {
+        expiresIn: "1h"
+      })
+    res.status(200).json({
+      token: token,
+      expiresIn: 3600,
+      userId: fetched._id
+    });
+    
+  } catch (err) {
+    next(err);
+  }
+
+}
+
 
 // GET ALL USERS
 exports.getAll = async (req, res, next) => {
@@ -26,7 +60,16 @@ exports.getOne = async (req, res, next) => {
 // CREATE USER
 exports.create = async (req, res, next) => {
     try {
-        const user = await User.create(req.body);
+        const { name, mobile, organization, isFarmer, password } = req.body;
+        const hashedPassword = await bcrypt.hash(password, 10);
+        let user = new User({
+            name,
+            mobile,
+            organization,
+            isFarmer,
+            password :hashedPassword
+        });
+        await user.save()
         res.status(201).json(user);
     } catch (err) {
         next(err);
@@ -43,56 +86,7 @@ exports.update = async (req, res, next) => {
     }
 }
 
-// LOGIN USER
-exports.login = async (req, res, next) => {
-  try {
-    const { mobile, password } = req.body;
 
-    // Find user by email
-    const user = await User.findOne({ mobile });
-
-    // If user not found, return error
-    if (!user) {
-      return res.status(401).json({
-        message: 'Auth failed'
-      });
-    }
-
-    // Compare password with hashed password in database
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    // If password does not match, return error
-    if (!isMatch) {
-      return res.status(401).json({
-        message: 'Auth failed'
-      });
-    }
-
-    // Create JWT token
-    const token = jwt.sign(
-      {
-        mobile: user.mobile,
-        userId: user._id
-      },
-      process.env.JWT_KEY,
-      {
-        expiresIn: '24h'
-      }
-    );
-
-    // Return token in response
-    res.status(200).json({
-      token,
-      expiresIn: 3600,
-      userId: user._id
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: 'Auth failed',
-      error
-    });
-  }
-};
 
 // DELETE USER
 exports.delete = async (req, res, next) => {
