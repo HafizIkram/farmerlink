@@ -17,6 +17,10 @@ const userSchema = new Schema({
         type: Boolean,
         required: true 
     },
+    address: {
+        type: String,
+        required: true
+    },
     password: {
         type: String,
         required: true

@@ -1,10 +1,50 @@
 const {ObjectId} = require('mongoose').Types;
 const Product = require('../models/products');
+const User = require('../models/users');
 
 exports.getAll = async (req, res, next) => {
     try {
         const products = await Product.find();
         res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json(error);
+    }
+}
+
+
+exports.filter = async (req, res, next) => {
+    const { categories, price, weight, farmerId } = req.body;
+
+    let query = {};
+    if (categories) query.category = { $in: categories };
+    if (price) query['productList.price'] = { $lte: price };
+    if (weight) query['productList.weight'] = { $gte: weight[0], $lte: weight[1] };
+    if (farmerId) query.farmerId = ObjectId(farmerId);
+    const pipeline = [ 
+        { $unwind: "$productList" },
+        {
+            $match: query,
+        },
+        {$group: {
+            _id: "$_id",
+            name: {$first: "$name"},
+            category: {$first: "$category"},
+            description: {$first: "$description"},
+            farmerId: {$first: "$farmerId"},
+            productList: {$push: "$productList"}
+        }},
+    ];
+    
+    await Product.aggregate(pipeline)
+        .then(products => res.status(200).json(products))
+        .catch(err => res.status(500).json({ message: 'Error retrieving products' }));
+};
+
+
+exports.getAllBrands = async (req, res, next) => {
+    try {
+        const brands = await User.find({isFarmer: true}, {organization: 1});
+        res.status(200).json(brands);
     } catch (error) {
         res.status(500).json(error);
     }
@@ -21,37 +61,13 @@ exports.getOne = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
     try {
-        const { productList } = req.body;
-        let prodList = [];
-        let obj = {
-            name:req.body.name,
-            images: req.body.images,
-            description: req.body.description,
-            category: req.body.category,
-            farmerId: req.body.farmerId,
-        }
-        if(productList.length) {
-            for(const ele of productList) {
-                prodList.push({
-                    insertOne: {
-                        document: {
-                            ...obj,
-                            price: ele.price,
-                            quantity: ele.quantity,
-                            weight: ele.weight,
-                            unit: ele.unit
-                        }
-                    }
-                })
-            }
-        }
-        await Product.bulkWrite(prodList);
+        const product = await Product.create(req.body);
         res.status(201).json({
             message: 'Product created successfully',
-            length: prodList.length
+            length: 1
         });
     } catch (error) {
-        res.status(500).json(error);
+        res.status(500).json(error.message);
     }
 }
 

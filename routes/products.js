@@ -3,6 +3,10 @@ const Products = require('../controllers/products');
 
 router.get('/', Products.getAll);
 
+router.post('/filter', Products.filter);
+
+router.get('/brands', Products.getAllBrands);
+
 router.get('/:id', Products.getOne);
 
 router.post('/', Products.create);
