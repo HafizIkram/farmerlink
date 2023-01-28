@@ -11,7 +11,7 @@ const userSchema = new Schema({
     },
     organization: {
         type: String,
-        required: true
+        required: false
     },
     isFarmer: {
         type: Boolean,

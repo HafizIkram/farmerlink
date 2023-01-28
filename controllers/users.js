@@ -61,6 +61,11 @@ exports.getOne = async (req, res, next) => {
 exports.create = async (req, res, next) => {
     try {
         const { name, mobile, organization, isFarmer, password } = req.body;
+        if(isFarmer && !organization) {
+            return res.status(400).json({
+                message: 'Organization is required'
+            });
+        }
         const hashedPassword = await bcrypt.hash(password, 10);
         let user = new User({
             name,
