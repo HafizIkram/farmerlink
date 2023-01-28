@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const Products = require('../controllers/products');
 
-router.get('/', Products.getAll);
+router.get('/farmer/:id', Products.getAll);
 
 router.get('/:id', Products.getOne);
 
