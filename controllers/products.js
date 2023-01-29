@@ -19,7 +19,9 @@ exports.filter = async (req, res, next) => {
     if (categories) query.category = { $in: categories };
     if (price) query['productList.price'] = { $lte: price };
     if (weight) query['productList.weight'] = { $gte: weight[0], $lte: weight[1] };
-    if (farmerId) query.farmerId = ObjectId(farmerId);
+    if (farmerId) query.farmerId = {
+        $in: farmerId.map(id => ObjectId(id))
+    }
     const pipeline = [ 
         { $unwind: "$productList" },
         {
