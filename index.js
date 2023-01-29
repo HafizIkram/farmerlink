@@ -12,7 +12,6 @@ app.use(cors());
 app.use('/api/users', require('./routes/users'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/orders', require('./routes/orders'));
-app.use('/api/cart', require('./routes/cart'));
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -21,7 +20,6 @@ app.get('/', (req, res) => {
 app.all('*', (req, res) => {
     res.status(404).send(`Route ${req.originalUrl} not found`);
 });
-console.log(port)
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
     console.log('Connected to database');
     app.listen(port, () => {
