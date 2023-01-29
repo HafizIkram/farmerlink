@@ -46,7 +46,7 @@ exports.filter = async (req, res, next) => {
         query.status = status;
     }
     try {
-        const orders = await Order.find(query).populate('productId userId farmerId', 'name address');
+        const orders = await Order.find(query).populate('productId userId farmerId', 'name address images');
         res.status(200).json(orders);
     } catch (error) {
         next(error.message);
